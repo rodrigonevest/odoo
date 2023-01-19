@@ -1,5 +1,5 @@
 {
-    'name': "My library",
+    'name': "My_library",
     'summary': "Manage books easily",
     'description': """
     Manage Library

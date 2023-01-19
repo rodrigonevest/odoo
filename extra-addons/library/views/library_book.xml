@@ -2,7 +2,7 @@
 <odoo>
     <!-- Data records go here-->
     <record id='library_book_action' model='ir.actions.act_window'>
-        <field name="name">Library Books</field>
+        <field name="name">Livros da Biblioteca</field>
         <field name="res_model">library.book</field>
         <field name="view_mode">tree,form</field>
     </record>
@@ -16,13 +16,27 @@
             <form>
                 <group>
                     <group>
-                            <field name="name"/>
-                            <field name="author_ids" widget="many2many_tags"/>
-                        </group>
-
-                        <group>
-                            <field name="date_release"/>
+                        <field name="name"/>
+                        <field name="author_ids" widget="many2many_tags"/>
+                        <field  name="state"/>
+                        <field name="notes"/>
                     </group>
+                    <group>
+                        <field name="short_name"/>
+                        <field name="date_release"/>
+                        <field name="date_updated"/>
+                        <field name="cover" widget="image" class="oe_avatar"/>
+                        <field name="reader_rating"/>                        
+                    </group>
+                    <group>
+                        <field name="cost_price"/>
+                        <field name= "retail_price"/>
+                        <field name="currency_id"/>
+                    </group>
+                </group>
+                    
+                <group>
+                    <field name="description"/>
                 </group>
             </form>
         </field>
@@ -50,17 +64,5 @@
         </search>
         </field>
     </record>
-    <form>
-        <group>
-            <group>
-                <field name="name"/>
-                <field name="author_ids" widget="many2many_
-                tags"/>
-            </group>
-            <group>
-                <field name="short_name"/>
-                <field name="date_release"/>
-            </group>
-        </group>
-    </form>
+    
 </odoo>
