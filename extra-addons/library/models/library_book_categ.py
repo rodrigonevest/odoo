@@ -15,8 +15,9 @@ class BookCategory(models.Model):
     child_ids = fields.One2many('library.book.category',
                                  'parent_id',
                                 string='Categorias infantis')
-    category_id = fields.Many2one('library.book.category')
-    @api.constraints('parent_id')
+    
+
+    @api.constrains('parent_id')
     def _check_hierarchy(self):
         if not self._check_recursion():
             raise models.ValidationError('Erro! Você não pode criar categorias recursivas.')

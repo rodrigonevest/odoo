@@ -1,16 +1,16 @@
-from odoo import models, fields, api
+from odoo import api, models, fields
 from odoo.exceptions import ValidationError
+from datetime import timedelta
 
 class LibraryBook(models.Model):
 
     _name = 'library.book'
     _description = 'Library Book'
-    _order = 'date_release desc, name'
-    _rec_name = 'short_name'
-    _inherit = 'res.partner'
+    _order = 'date_release desc, name'    
     _sql_constraints = [('name_uniq', 'UNIQUE (name)','O título do livro deve ser único.'),
                 ('positive_page', 'CHECK(pages>0)', 'O número de páginas deve ser positivo')]
     name = fields.Char('Título', required=True)
+    category_id = fields.Many2one('library.book.category')
     #short_name = fields.Char('Título Curto',required=True)
     #date_release = fields.Date('Data de Lançamento')
     author_ids = fields.Many2many('res.partner',string='Autor(s)')
@@ -38,20 +38,71 @@ class LibraryBook(models.Model):
     currency_id = fields.Many2one('res.currency', string='Moeda')
     retail_price = fields.Monetary('Prreço Varejo',# optional: currency_field='currency_id',
     )
-    publisher_id = fields.Many2one(
-        'res.partner', string='Publisher',
+    publisher_id = fields.Many2one('res.partner', string='Publisher',
         # optional:
         ondelete='set null',
         context={},
         domain=[],
         )
-    authored_book_ids = fields.Many2many(
-        'library.book',
-        string='Authored Books',
-        # relation='library_book_res_partner_rel' #optional
+    author_ids = fields.Many2many('res.partner', string='Autor(s)')
+    
+    category_id = fields.Many2one('library.book.category')
+
+    age_days = fields.Float(
+        string='Days Since Release',
+        compute='_compute_age',
+        inverse='_inverse_age',
+        search='_search_age',
+        store=False, # optional
+        compute_sudo=True # optional
         )
+
+    #Para adicionar o método e implementar a lógica para escrever no campo calculado
+    def _inverse_age(self):
+        today = fields.Date.today()
+        for book in self.filtered('date_release'):
+            d = today - timedelta(days=book.age_days)
+            book.date_release = d
+
+    #lógica que permitirá a busca no campo computado, 
+    def _search_age(self, operator, value):
+        today = fields.Date.today()
+        value_days = timedelta(days=value)
+        value_date = today - value_days
+        # convert the operator:
+        # book with age > value have a date < value_date
+        operator_map = {
+            '>': '<', '>=': '<=',
+            '<': '>', '<=': '>=',
+            }
+        new_op = operator_map.get(operator, operator)
+        return [('date_release', new_op, value_date)]
+
+    #lógica de calculo
+    @api.depends('date_release')
+    def _compute_age(self):
+        today = fields.Date.today()
+        for book in self:
+            if book.date_release:
+                    delta = today - book.date_release
+                    book.age_days = delta.days
+            else:
+                book.age_days = 0
+
+
     @api.constrains('date_release')
     def _check_release_date(self):
         for record in self:
             if record.date_release and record.date_release > fields.Date.today():
                 raise models.ValidationError('Release date must be in the past')
+
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+    published_book_ids = fields.One2many(
+        'library.book', 'publisher_id',
+        string='Published Books')
+    authored_book_ids = fields.Many2many(
+        'library.book',
+        string='Authored Books',
+        #relation='library_book_res_partner_rel', #optional
+        )
