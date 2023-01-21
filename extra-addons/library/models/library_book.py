@@ -1,10 +1,14 @@
 from odoo import api, models, fields
 from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError
+from odoo.tools.translate import _
 from datetime import timedelta
+
 
 class LibraryBook(models.Model):
 
     _name = 'library.book'
+    _inherit = ['base.archive']
     _description = 'Library Book'
     _order = 'date_release desc, name'    
     _sql_constraints = [('name_uniq', 'UNIQUE (name)','O título do livro deve ser único.'),
@@ -20,8 +24,9 @@ class LibraryBook(models.Model):
     state = fields.Selection(
         [('draft', 'Não Disponível'),
         ('available', 'Disponível'),
-        ('lost', 'Perdida')],
-        'State', default="draft")
+        ('borrowed', 'Emprestado'),
+        ('lost', 'Perdido')],
+        'Status', default="draft")
     description = fields.Html('Descrição',sanitize=True, strip_style=False)
     cover = fields.Binary('Capa de livro')
     out_of_print = fields.Boolean('Fora de impressão?')
@@ -112,6 +117,55 @@ class LibraryBook(models.Model):
             if record.date_release and record.date_release > fields.Date.today():
                 raise models.ValidationError('Release date must be in the past')
 
+    #método auxiliar para verificar se uma transição de estado é permitida
+    @api.model
+    def is_allowed_transition(self, old_state, new_state):
+        allowed = [('draft', 'available'),
+                    ('available', 'borrowed'),
+                    ('borrowed', 'available'),
+                    ('available', 'lost'),
+                    ('borrowed', 'lost'),
+                    ('lost', 'available')]
+        return (old_state, new_state) in allowed
+
+    #método para alterar o estado de alguns livros para um novo estado que é passado como um argumento
+    def change_state(self, new_state):
+        for book in self:
+            if book.is_allowed_transition(book.state, new_state):
+                book.state = new_state
+            else:
+                msg = _('Moving from %s to %s is not allowed') % (book.state, new_state)
+                raise UserError(msg)
+    
+    #método para alterar o estado do livro chamando o método change_state
+    def make_available(self):
+        self.change_state('available')
+
+    def make_borrowed(self):
+        self.change_state('borrowed')
+        
+    def make_lost(self):
+        self.change_state('lost')
+
+    #método de erro
+    def post_to_webservice(self, data):
+        try:
+            req = requests.post('http://my-test-service.com',
+            data=data, timeout=10)
+            content = req.json()
+        except IOError:
+            error_msg = _("Something went wrong during data submission")
+            raise UserError(error_msg)
+        return content
+
+    # método chamado get_all_library_members
+    def log_all_library_members(self):
+        # Este é um conjunto de registros vazio do modelo library.member
+        library_member_model = self.env['library.member']
+        all_members = library_member_model.search([])
+        print("ALL MEMBERS:", all_members)
+        return True
+
 class ResPartner(models.Model):
     _inherit = 'res.partner'
     published_book_ids = fields.One2many(
@@ -136,7 +190,8 @@ class LibraryMember(models.Model):
     _inherits = {'res.partner': 'partner_id'}
     partner_id = fields.Many2one(
         'res.partner',
-        ondelete='cascade')
+        ondelete='cascade',
+        delegate=True)
     date_start = fields.Date('Membro Desde')
     date_end = fields.Date('Data de Finalização')
     member_number = fields.Char()
