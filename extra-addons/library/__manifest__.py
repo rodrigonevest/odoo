@@ -28,8 +28,10 @@
         'views/views.xml',
         'views/templates.xml',
         'views/library_book.xml',
+        'views/library_book_categ.xml',
         'security/groups.xml',
         'security/ir.model.access.csv',
+        
     ],
     # only loaded in demonstration mode
     'demo': [
