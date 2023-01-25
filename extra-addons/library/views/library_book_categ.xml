@@ -9,6 +9,7 @@
 
     <menuitem name="Minha Biblioteca" id="library_base_menu" />
     <menuitem name="Categoria" id="library_book_categ_menu" parent="library_base_menu" action="library_book_categ_action"/>
+    
 
     <record id="library_book_categ_view_tree" model="ir.ui.view">
         <field name="name">Library Book Category List</field>

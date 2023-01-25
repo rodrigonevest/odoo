@@ -8,7 +8,8 @@ from datetime import timedelta
 class LibraryBook(models.Model):
 
     _name = 'library.book'
-    _inherit = ['base.archive']
+    #_inherit = 'library.book'
+    #manager_remarks = fields.Text('Manager Remarks')
     _description = 'Library Book'
     _order = 'date_release desc, name'    
     _sql_constraints = [('name_uniq', 'UNIQUE (name)','O título do livro deve ser único.'),
@@ -19,6 +20,7 @@ class LibraryBook(models.Model):
     #short_name = fields.Char('Título Curto',required=True)
     #date_release = fields.Date('Data de Lançamento')
     author_ids = fields.Many2many('res.partner',string='Autor(s)')
+    isbn = fields.Char('ISBN')
     short_name = fields.Char('Título Curto', translate=True, index=True)
     notes = fields.Text('Notas Internas')
     state = fields.Selection(
@@ -26,17 +28,14 @@ class LibraryBook(models.Model):
         ('available', 'Disponível'),
         ('borrowed', 'Emprestado'),
         ('lost', 'Perdido')],
-        'Status', default="draft")
+        'Status', default="available")
     description = fields.Html('Descrição',sanitize=True, strip_style=False)
     cover = fields.Binary('Capa de livro')
     out_of_print = fields.Boolean('Fora de impressão?')
     date_release = fields.Date('Data de Lançamento')
     date_updated = fields.Datetime('Última Atualização')
     active = fields.Boolean('Ativo', default=True)
-    pages = fields.Integer('Número de páginas',
-                            goups = 'base.group_user',
-                            states={'lost':[{'readonly', True}]},
-                            help = 'Contagem total de páginas do livro', company_dependent=False)
+    pages = fields.Integer('Número de páginas')
     reader_rating = fields.Float('Avaliação média do leitor',
                                     digits=(14, 4), # Optional precision decimals,
     )
@@ -54,7 +53,7 @@ class LibraryBook(models.Model):
         'Cidade do Editor',
         related='publisher_id.city',
         readonly=True)
-    author_ids = fields.Many2many('res.partner', string='Autor(s)')
+    
     
     category_id = fields.Many2one('library.book.category')
 
@@ -66,6 +65,9 @@ class LibraryBook(models.Model):
         store=False, # optional
         compute_sudo=True # optional
         )
+    old_edition = fields.Many2one('library.book', string='Old Edition')
+    
+    
     #método auxiliar para construir dinamicamente uma lista de alvos selecionáveis
     @api.model
     def _referencable_models(self):
@@ -146,6 +148,9 @@ class LibraryBook(models.Model):
         
     def make_lost(self):
         self.change_state('lost')
+    
+    def make_draft(self):
+        self.change_state('draft')
 
     #método de erro
     def post_to_webservice(self, data):
@@ -165,6 +170,71 @@ class LibraryBook(models.Model):
         all_members = library_member_model.search([])
         print("ALL MEMBERS:", all_members)
         return True
+
+    #atualizar o campo date_updated de um livro
+    def change_release_date(self):
+        self.ensure_one()
+        self.date_release = fields.Date.today()
+
+    #filtrar registros
+    @api.model
+    def books_with_multiple_authors(self, all_books):
+        return all_books.filter(lambda b: len(b.author_ids) > 1)
+    
+    #método para recuperar os nomes dos autores do conjunto de registros de livros, passado como argumento
+    @api.model
+    def get_author_names(self, books):
+        return books.mapped('author_ids.name')
+
+    #Classificando conjuntos de registros já existente
+    @api.model
+    def sort_books_by_date(self, books):
+        return books.sorted(key='date_release')
+    
+    #evitar que usuários que não são membros do grupo bibliotecário modifiquem o valor de manager_remarks
+    #@api.model
+    #def create(self, values):
+        #if not self.user_has_groups('my_library.acl_book_librarian'):
+          #  if 'manager_remarks' in values:
+         #       raise UserError(
+        #                        'You are not allowed to modify '
+       #                         'manager_remarks'
+      #                          )
+     #   return super(LibraryBook, self).create(values)
+    #def write(self, values):
+        #if not self.user_has_groups('my_library.acl_book_librarian'):
+            #if 'manager_remarks' in values:
+            #    raise UserError(
+           #                     'You are not allowed to modify '
+          #                      'manager_remarks'
+         #                       )
+        #return super(LibraryBook, self).write(values)
+
+    #pesquisar um livro por título, autor ou ISBN
+    def name_get(self):
+        result = []
+        for book in self:
+            authors = book.author_ids.mapped('name')
+            name = '%s (%s)' % (book.name, ', '.join(authors))
+            result.append((book.id, name))
+            return result
+    
+    #pesquisar no modulo libray.book pelo autor, título ou ISBN
+    @api.model
+    def _name_search(self, name='', args=None,
+        operator='ilike',
+        limit=100, name_get_uid=None):
+        args = [] if args is None else args.copy()
+        if not(name == '' and operator == 'ilike'):
+            args += ['|', '|',
+                    ('name', operator, name),
+                    ('isbn', operator, name),
+                    ('author_ids.name', operator, name)
+                    ]
+        return super(LibraryBook, self)._name_search(
+                                                    name=name, args=args, operator=operator,
+                                                    limit=limit, name_get_uid=name_get_uid)
+
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
