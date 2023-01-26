@@ -17,6 +17,6 @@ class LibraryBook(models.Model):
 
     def make_available(self):
         self.date_return = False
-        return super(LibraryBook, self).make_borrowed()
+        return super(LibraryBook, self).make_available()
 
     

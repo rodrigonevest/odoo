@@ -28,7 +28,7 @@ class LibraryBook(models.Model):
         ('available', 'Disponível'),
         ('borrowed', 'Emprestado'),
         ('lost', 'Perdido')],
-        'Status', default="available")
+        'Status', default="draft")
     description = fields.Html('Descrição',sanitize=True, strip_style=False)
     cover = fields.Binary('Capa de livro')
     out_of_print = fields.Boolean('Fora de impressão?')
@@ -39,7 +39,7 @@ class LibraryBook(models.Model):
     reader_rating = fields.Float('Avaliação média do leitor',
                                     digits=(14, 4), # Optional precision decimals,
     )
-    cost_price = fields.Float('Book Cost', digits='Book Price')
+    cost_price = fields.Float('Book Cost')
     currency_id = fields.Many2one('res.currency', string='Moeda')
     retail_price = fields.Monetary('Prreço Varejo',# optional: currency_field='currency_id',
     )
@@ -127,7 +127,8 @@ class LibraryBook(models.Model):
                     ('borrowed', 'available'),
                     ('available', 'lost'),
                     ('borrowed', 'lost'),
-                    ('lost', 'available')]
+                    ('lost', 'available'),
+                    ('available','draft')]
         return (old_state, new_state) in allowed
 
     #método para alterar o estado de alguns livros para um novo estado que é passado como um argumento
@@ -138,7 +139,7 @@ class LibraryBook(models.Model):
             else:
                 msg = _('Moving from %s to %s is not allowed') % (book.state, new_state)
                 raise UserError(msg)
-    
+
     #método para alterar o estado do livro chamando o método change_state
     def make_available(self):
         self.change_state('available')
@@ -175,6 +176,26 @@ class LibraryBook(models.Model):
     def change_release_date(self):
         self.ensure_one()
         self.date_release = fields.Date.today()
+
+    #Procurando por registros
+    def find_book(self):
+        domain = [
+                '|',
+                '&', ('name', 'ilike', 'Book Name'),
+                ('category_id.name', 'ilike', 'Category Name'),
+                '&', ('name', 'ilike', 'Book Name 2'),
+                ('category_id.name', 'ilike', 'Category Name 2')
+                ]
+        books = self.search(domain)
+
+    def find_partner(self):
+        PartnerObj = self.env['res.partner']
+        domain = [
+                '&', ('name', 'ilike', 'Parth Gajjar'),
+                ('company_id.name', '=', 'Odoo')
+                ]
+        partner = PartnerObj.search(domain)  
+
 
     #filtrar registros
     @api.model
@@ -235,6 +256,15 @@ class LibraryBook(models.Model):
                                                     name=name, args=args, operator=operator,
                                                     limit=limit, name_get_uid=name_get_uid)
 
+    #extrair resultados agrupados
+    @api.model
+    def _get_average_cost(self):
+        grouped_result = self.read_group(
+                                        [('cost_price', "!=", False)], # Domain
+                                        ['category_id', 'cost_price:avg'], # Fields to ccess
+                                        ['category_id'] # group_by
+                                    )
+        return grouped_result
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
@@ -275,3 +305,14 @@ class BaseArchive(models.AbstractModel):
     def do_archive(self):
         for record in self:
             record.active = not record.active
+
+class LibraryBookRent(models.Model):
+    _name = 'library.book.rent'
+    book_id = fields.Many2one('library.book', 'Livros', required=True)
+    borrower_id = fields.Many2one('res.partner', 'Emprestado', required=True)
+    state = fields.Selection(
+    [('ongoing', 'Ongoing'),
+    ('returned', 'Returned')],
+    'Status', default='ongoing', required=True)
+    rent_date = fields.Date(default=fields.Date.today)
+    return_date = fields.Date()

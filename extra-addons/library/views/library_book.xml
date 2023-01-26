@@ -9,15 +9,14 @@
 
     <menuitem name="Minha Biblioteca" id="library_base_menu" />
     <menuitem name="Livros" id="library_book_menu" parent="library_base_menu" action="library_book_action"/>
-
+    
     
 
     <record id="library_book_view_form" model="ir.ui.view">
         <field name="name">Library Book Form</field>
         <field name="model">library.book</field>
         <field name="arch" type="xml">            
-            <form> 
-
+            <form>
                 <header>
                     <button name="make_available" string="Disponibilizar" type="object"/>
                     <button name="make_borrowed" string="Emprestado" type="object"/>
@@ -26,7 +25,6 @@
                     <field name="state" widget="statusbar"/> 
                 </header>   
                 <sheet>
-                    
                     
                     <group>
                         <group>
@@ -38,7 +36,8 @@
                             <field name="isbn"/> 
                             <field name="pages"/> 
                             <field name="publisher_id"/> 
-                            <field name="publisher_city"/>                         
+                            <field name="publisher_city"/>  
+                            <field name="old_edition" />                       
                         </group>
                         <group>
                             <field name="short_name"/>
@@ -60,6 +59,7 @@
                     </group> 
                     <button name="log_all_library_members" string="Log Members" type="object"/> 
                     <button name="change_release_date" string="Update Date" type="object"/>
+                    
                 </sheet>              
             </form>
         </field> 
