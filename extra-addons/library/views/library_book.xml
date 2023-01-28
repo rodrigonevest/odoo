@@ -21,7 +21,7 @@
                     <button name="make_available" string="Disponibilizar" type="object"/>
                     <button name="make_borrowed" string="Emprestado" type="object"/>
                     <button name="make_lost" string="Perdido" type="object"/> 
-                    <button name="make_draft" string="Indisponível" type="object"/>                    
+                    <button name="make_draft" string="Indisponível" type="object"/> 
                     <field name="state" widget="statusbar"/> 
                 </header>   
                 <sheet>
@@ -59,7 +59,8 @@
                     </group> 
                     <button name="log_all_library_members" string="Log Members" type="object"/> 
                     <button name="change_release_date" string="Update Date" type="object"/>
-                    
+                    <button name="book_rent" string="Rent this book" type="object" class="btn-primary"/>
+                
                 </sheet>              
             </form>
         </field> 
@@ -72,7 +73,8 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="date_release"/>                
+                <field name="date_release"/>  
+                <field name="state"/>              
             </tree>
         </field>
     </record>

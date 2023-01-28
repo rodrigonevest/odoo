@@ -8,7 +8,7 @@ from datetime import timedelta
 class LibraryBook(models.Model):
 
     _name = 'library.book'
-    #_inherit = 'library.book'
+    #_inherit = 'base.archive'
     #manager_remarks = fields.Text('Manager Remarks')
     _description = 'Library Book'
     _order = 'date_release desc, name'    
@@ -28,13 +28,13 @@ class LibraryBook(models.Model):
         ('available', 'Disponível'),
         ('borrowed', 'Emprestado'),
         ('lost', 'Perdido')],
-        'Status', default="draft")
+        'Status', default="available")
     description = fields.Html('Descrição',sanitize=True, strip_style=False)
     cover = fields.Binary('Capa de livro')
     out_of_print = fields.Boolean('Fora de impressão?')
     date_release = fields.Date('Data de Lançamento')
+    active = fields.Boolean(default=True)
     date_updated = fields.Datetime('Última Atualização')
-    active = fields.Boolean('Ativo', default=True)
     pages = fields.Integer('Número de páginas')
     reader_rating = fields.Float('Avaliação média do leitor',
                                     digits=(14, 4), # Optional precision decimals,
@@ -66,6 +66,7 @@ class LibraryBook(models.Model):
         compute_sudo=True # optional
         )
     old_edition = fields.Many2one('library.book', string='Old Edition')
+    
     
     
     #método auxiliar para construir dinamicamente uma lista de alvos selecionáveis
@@ -148,6 +149,7 @@ class LibraryBook(models.Model):
         self.change_state('borrowed')
         
     def make_lost(self):
+        self.ensure_one()
         self.change_state('lost')
     
     def make_draft(self):
@@ -266,6 +268,12 @@ class LibraryBook(models.Model):
                                     )
         return grouped_result
 
+    #permitir que usuários normais emprestem livros
+    def book_rent(self):
+        self.ensure_one()
+        if self.state != 'available':
+            raise UserError(_('Book is not available for renting'))
+
 class ResPartner(models.Model):
     _inherit = 'res.partner'
     published_book_ids = fields.One2many(
@@ -306,13 +314,3 @@ class BaseArchive(models.AbstractModel):
         for record in self:
             record.active = not record.active
 
-class LibraryBookRent(models.Model):
-    _name = 'library.book.rent'
-    book_id = fields.Many2one('library.book', 'Livros', required=True)
-    borrower_id = fields.Many2one('res.partner', 'Emprestado', required=True)
-    state = fields.Selection(
-    [('ongoing', 'Ongoing'),
-    ('returned', 'Returned')],
-    'Status', default='ongoing', required=True)
-    rent_date = fields.Date(default=fields.Date.today)
-    return_date = fields.Date()
