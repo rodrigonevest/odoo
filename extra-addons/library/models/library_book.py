@@ -3,6 +3,9 @@ from odoo.exceptions import ValidationError
 from odoo.exceptions import UserError
 from odoo.tools.translate import _
 from datetime import timedelta
+import logging
+from odoo.tests.common import Form
+
 
 
 class LibraryBook(models.Model):
@@ -150,7 +153,9 @@ class LibraryBook(models.Model):
         
     def make_lost(self):
         self.ensure_one()
-        self.change_state('lost')
+        self.state = 'lost'
+        if not self.env.context.get('avoid_deactivate'):
+            self.active = False
     
     def make_draft(self):
         self.change_state('draft')
@@ -270,9 +275,29 @@ class LibraryBook(models.Model):
 
     #permitir que usuários normais emprestem livros
     def book_rent(self):
-        self.ensure_one()
+        self.ensure_one()    
         if self.state != 'available':
+            self.env['library.rent.wizard']
             raise UserError(_('Book is not available for renting'))
+        
+
+    #informações sobre o número médio de dias que um usuário mantém um determinado livro
+    def average_book_occupation(self):
+        self.flush()
+        sql_query = """
+                    SELECT lb.name, avg((EXTRACT(epoch from age(return_date, rent_date)) / 86400))::int
+                    FROM library_book_rent AS lbr
+                    JOIN library_book as lb ON lb.id = lbr.book_id
+                    WHERE lbr.state = 'returned'
+                    GROUP BY lb.name;"""
+        self.env.cr.execute(sql_query)
+        result = self.env.cr.fetchall()
+        logging.info("Average book occupation: %s", result)
+
+    #método de retono dos livros
+    def return_all_books(self):
+        self.ensure_one()
+        wizard = self.env['library.return.wizard']
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
