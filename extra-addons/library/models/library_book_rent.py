@@ -5,7 +5,7 @@ from odoo import models, fields, api
 class LibraryBookRent(models.Model):
     _name = 'library.book.rent'
 
-    book_id = fields.Many2one('library.book', 'Book', required=True)
+    book_id = fields.Many2one('library.book', 'Livros', required=True)
     borrower_id = fields.Many2one('res.partner', 'Borrower', required=True)
     state = fields.Selection([('ongoing', 'Ongoing'),
                               ('returned', 'Returned'),
@@ -13,6 +13,8 @@ class LibraryBookRent(models.Model):
                              'State', default='ongoing', required=True)
     rent_date = fields.Date(default=fields.Date.today)
     return_date = fields.Date()
+
+    
 
     
 

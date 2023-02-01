@@ -18,6 +18,8 @@
         <field name="arch" type="xml">            
             <form>
                 <header>
+                    <button name="%(action_wizard_rent_books)d " string="Rent this book" type="action" class="btn-primary" context="{'default_lead_id': active_id}" />
+                    <button name="return_all_books" string="Return all book" type="object" class="btn-primary" groups="my_library.group_self_borrow"/>
                     <button name="make_available" string="Disponibilizar" type="object"/>
                     <button name="make_borrowed" string="Emprestado" type="object"/>
                     <button name="make_lost" string="Perdido" type="object"/> 
@@ -58,10 +60,7 @@
                         <field name="description"/>
                     </group> 
                     
-                    <button name="log_all_library_members" string="Log Members" type="object"/> 
-                    <button name="change_release_date" string="Update Date" type="object"/>
-                    <button name="book_rent" string="Rent this book" type="object" class="btn-primary"/>
-                    <button name="average_book_occupation" string="Log Average Occ." type="object" />
+                    
                 </sheet>              
             </form>
         </field> 

@@ -20,7 +20,21 @@ class LibraryReturnWizard(models.TransientModel):
                 loan.book_return()
                 
 
-    #retorna a lista de livros por usuario
+    #retorna a lista de livros por usuario com o método compute
+    @api.depends('borrower_id')
+    def onchange_member(self):
+        rentModel = self.env['library.book.rent']
+        books_on_rent = rentModel.search(
+                                        [('state', '=', 'ongoing'),
+                                        ('borrower_id', '=', self.borrower_id.id)]
+                                        )
+        book_ids = fields.Many2many('library.book',
+                                    string='Books',
+                                    compute="onchange_member",
+                                    readonly=False)
+        
+    """
+    teste1
     @api.onchange('borrower_id')
     def onchange_member(self):
         rentModel = self.env['library.book.rent']
@@ -29,8 +43,8 @@ class LibraryReturnWizard(models.TransientModel):
                                         ('borrower_id', '=', self.borrower_id.id)]
                                         )
         self.book_ids = books_on_rent.mapped('book_id')
-        
-    """
+
+        teste2
       @api.onchange('member_id')
     def onchange_member(self):
         rentModel = self.env['library.book.rent']

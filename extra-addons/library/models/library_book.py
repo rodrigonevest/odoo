@@ -277,7 +277,6 @@ class LibraryBook(models.Model):
     def book_rent(self):
         self.ensure_one()    
         if self.state != 'available':
-            self.env['library.rent.wizard']
             raise UserError(_('Book is not available for renting'))
         
 
@@ -298,6 +297,8 @@ class LibraryBook(models.Model):
     def return_all_books(self):
         self.ensure_one()
         wizard = self.env['library.return.wizard']
+        wizard.create({
+                      'borrower_id': self.env.user.partner_id.id}).books_returns()
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'

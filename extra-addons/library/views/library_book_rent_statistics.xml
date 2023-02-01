@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id='library_book_rent_statistics_action' model='ir.actions.act_window'>
+        <field name="name">Statistics Rent</field>
+        <field name="res_model">library.book.rent.statistics</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Statistics Rent" id="library_book_rent_statistics_menu" parent="library_base_menu" action="library_book_rent_statistics_action"/>
+
+    <!-- Form View -->
+    <record id="library_book_rent_statistics_view_form" model="ir.ui.view">
+        <field name="name">Library Book Rent Statistics Form</field>
+        <field name="model">library.book.rent.statistics</field>
+        <field name="arch" type="xml">
+            <form>
+                
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="book_id" />
+                            
+                        </group>
+                        <group>
+                            <field name="rent_count"/>
+                            <field name="average_occupation"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree(list) View -->
+    <record id="library_book_rent_statistics_view_tree" model="ir.ui.view">
+        <field name="name">Library Book Rent Statistics List</field>
+        <field name="model">library.book.rent.statistics</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="book_id"/>
+                <field name="rent_count"/>
+                <field name="average_occupation"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="library_book_rent_statistics_view_search" model="ir.ui.view">
+        <field name="name">Library Book Rent Statisics Search</field>
+        <field name="model">library.book.rent.statistics</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="book_id"/>
+                
+                <filter string="On statistics" name="on_statistics" domain="[('book_id','=','False')]"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>
