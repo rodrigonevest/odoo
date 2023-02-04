@@ -27,7 +27,9 @@
                     <field name="state" widget="statusbar"/> 
                 </header>   
                 <sheet>
-                    
+                    <widget name="web_ribbon" title="Perdido" bg_color="bg-danger" attrs="{'invisible': [('state', '!=', 'lost')]}"/>
+                    <widget name="web_ribbon" title="Disponível" attrs="{'invisible': [('state', '!=', 'available')]}" />
+                    <widget name="web_ribbon" title="Emprestado" bg_color="bg-warning" attrs="{'invisible': [('state', '!=', 'borrowed')]}" />
                     <group>
                         <group>
                             <field name="name"/>
@@ -58,10 +60,10 @@
                         
                     <group>
                         <field name="description"/>
-                    </group> 
+                    </group>                
                     
-                    
-                </sheet>              
+                </sheet> 
+                            
             </form>
         </field> 
                

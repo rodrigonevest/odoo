@@ -36,7 +36,7 @@ class LibraryBook(models.Model):
     cover = fields.Binary('Capa de livro')
     out_of_print = fields.Boolean('Fora de impressão?')
     date_release = fields.Date('Data de Lançamento')
-    active = fields.Boolean(default=True)
+    active = fields.Boolean('Active', default=True)
     date_updated = fields.Datetime('Última Atualização')
     pages = fields.Integer('Número de páginas')
     reader_rating = fields.Float('Avaliação média do leitor',
@@ -151,11 +151,9 @@ class LibraryBook(models.Model):
     def make_borrowed(self):
         self.change_state('borrowed')
         
+        
     def make_lost(self):
-        self.ensure_one()
-        self.state = 'lost'
-        if not self.env.context.get('avoid_deactivate'):
-            self.active = False
+        self.change_state('lost')
     
     def make_draft(self):
         self.change_state('draft')
