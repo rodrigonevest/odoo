@@ -9,9 +9,9 @@ Description related to library.
     """,  # Supports reStructuredText(RST) format
     'author': "Parth Gajjar",
     'website': "http://www.example.com",
-    'category': 'Tools',
+    'category': 'Library',
     'version': '14.0.1',
-    'depends': ['base'],
+    'depends': ['base','base_setup'],
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
@@ -22,6 +22,7 @@ Description related to library.
         #'views/res_config_settings_views.xml',
         'wizard/library_rent_wizard.xml',
         'wizard/library_return_wizard.xml',
+        
         
         
     ],

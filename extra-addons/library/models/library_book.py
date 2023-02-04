@@ -35,7 +35,7 @@ class LibraryBook(models.Model):
     description = fields.Html('Descrição',sanitize=True, strip_style=False)
     cover = fields.Binary('Capa de livro')
     out_of_print = fields.Boolean('Fora de impressão?')
-    date_release = fields.Date('Data de Lançamento')
+    date_release = fields.Date('Data de Lançamento', groups='my_library.group_release_dates')
     active = fields.Boolean('Active', default=True)
     date_updated = fields.Datetime('Última Atualização')
     pages = fields.Integer('Número de páginas')
