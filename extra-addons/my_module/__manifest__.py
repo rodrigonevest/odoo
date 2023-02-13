@@ -6,7 +6,7 @@
     'website': "http://www.example.com",
     'category': 'Uncategorized',
     'version': '14.0.1',
-    'depends': ['base', 'account','project','web_dashboard'],
+    'depends': ['base', 'account','project'],
     'data': [
         #'views/my_contacts.xml',
         'views/my_contatcts_kanban.xml',

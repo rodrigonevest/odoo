@@ -5,7 +5,8 @@ from odoo.tools.translate import _
 from datetime import timedelta
 import logging
 from odoo.tests.common import Form
-
+import email
+import datetime
 
 
 class LibraryBook(models.Model):
@@ -70,8 +71,14 @@ class LibraryBook(models.Model):
         )
     old_edition = fields.Many2one('library.book', string='Old Edition')
     
-    
-    
+    #contar o número de pedidos de aluguel de um livro
+    rent_count = fields.Integer(compute="_compute_rent_count")
+    def _compute_rent_count(self):
+        BookRent = self.env['library.book.rent']
+        for book in self:
+            book.rent_count = BookRent.search_count(
+                                [('book_id', '=', book.id)]
+                                )
     #método auxiliar para construir dinamicamente uma lista de alvos selecionáveis
     @api.model
     def _referencable_models(self):
