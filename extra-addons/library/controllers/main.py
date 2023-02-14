@@ -3,6 +3,21 @@ from odoo.http import request
 
 
 class Main(http.Controller):
+
+     # controlador que sirva a lista de livros
+    @http.route('/books', type='http', auth="user", website=True)
+    def library_books(self):
+        return request.render(
+            'library.books', {
+                'books': request.env['library.book'].sudo().search([]),
+            })
+
+    @http.route('/books/<model("library.book"):book>', type='http', auth="user", website=True)
+    def library_book_detail(self, book):
+        return request.render(
+            'library.book_detail', {
+                                    'book': book,
+                                    })
     
     @http.route('/library/books', type='json',auth='none')
     #função para servir as mesmas informações no formato JSON
@@ -58,3 +73,16 @@ class Main(http.Controller):
     def book_details(self, book_id):
         record = request.env['library.book'].sudo().browse(int(book_id))
         return u'<html><body><h1>%s</h1>Authors: %s' % (record.name, u', '.join(record.author_ids.mapped('name')) or 'none', )
+
+    @http.route('/demo_page', type='http', auth='none')
+    def books(self):
+        image_url = '/library/static/src/image/odoo.png'
+        html_result = """<html>
+                            <body>
+                                <img src="%s"/>
+                            </body>
+                        </html>""" % image_url
+        return html_result
+
+   
+   

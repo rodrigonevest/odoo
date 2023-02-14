@@ -18,7 +18,8 @@ class LibraryBook(models.Model):
     _order = 'date_release desc, name'    
     _sql_constraints = [('name_uniq', 'UNIQUE (name)','O título do livro deve ser único.'),
                 ('positive_page', 'CHECK(pages>0)', 'O número de páginas deve ser positivo')]
-    
+    image = fields.Binary(attachment=True)
+    html_description = fields.Html()
     name = fields.Char('Título', required=True)
     category_id = fields.Many2one('library.book.category')
     #short_name = fields.Char('Título Curto',required=True)
