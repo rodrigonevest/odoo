@@ -9,21 +9,27 @@ import email
 import datetime
 
 
+class LibraryBookIssues(models.Model):
+    _name = 'book.issue'
+    book_id = fields.Many2one('library.book', required=True)
+    submitted_by = fields.Many2one('res.users')
+    issue_description = fields.Text()
+
+
 class LibraryBook(models.Model):
 
     _name = 'library.book'
+    _inherit = ['website.seo.metadata']
     #_inherit = 'base.archive'
     #manager_remarks = fields.Text('Manager Remarks')
     _description = 'Library Book'
-    _order = 'date_release desc, name'    
+    #_order = 'date_release desc, name'    
     _sql_constraints = [('name_uniq', 'UNIQUE (name)','O título do livro deve ser único.'),
                 ('positive_page', 'CHECK(pages>0)', 'O número de páginas deve ser positivo')]
-    image = fields.Binary(attachment=True)
-    html_description = fields.Html()
     name = fields.Char('Título', required=True)
     category_id = fields.Many2one('library.book.category')
     #short_name = fields.Char('Título Curto',required=True)
-    #date_release = fields.Date('Data de Lançamento')
+    date_release = fields.Date('Data de Lançamento')
     author_ids = fields.Many2many('res.partner',string='Autor(s)')
     isbn = fields.Char('ISBN')
     short_name = fields.Char('Título Curto', translate=True, index=True)
@@ -37,7 +43,7 @@ class LibraryBook(models.Model):
     description = fields.Html('Descrição',sanitize=True, strip_style=False)
     cover = fields.Binary('Capa de livro')
     out_of_print = fields.Boolean('Fora de impressão?')
-    date_release = fields.Date('Data de Lançamento', groups='my_library.group_release_dates')
+    #date_release = fields.Date('Data de Lançamento')
     active = fields.Boolean('Active', default=True)
     date_updated = fields.Datetime('Última Atualização')
     pages = fields.Integer('Número de páginas')
@@ -72,6 +78,10 @@ class LibraryBook(models.Model):
         )
     old_edition = fields.Many2one('library.book', string='Old Edition')
     
+    image = fields.Binary(attachment=True)
+    html_description = fields.Html()
+    book_issue_id = fields.One2many('book.issue', 'book_id')
+
     #contar o número de pedidos de aluguel de um livro
     rent_count = fields.Integer(compute="_compute_rent_count")
     def _compute_rent_count(self):
@@ -345,4 +355,6 @@ class BaseArchive(models.AbstractModel):
     def do_archive(self):
         for record in self:
             record.active = not record.active
+
+
 

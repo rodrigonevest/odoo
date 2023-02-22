@@ -1,5 +1,7 @@
 from odoo import http
 from odoo.http import request
+from odoo.addons.http_routing.models.ir_http import slug
+from odoo.addons.website.models.ir_http import sitemap_qs2dom
 
 
 class Main(http.Controller):
@@ -11,12 +13,22 @@ class Main(http.Controller):
             'library.books', {
                 'books': request.env['library.book'].sudo().search([]),
             })
+    
+    #mapa do site
+    def sitemap_books(env, rule, qs):
+        Books = env['library.book']
+        dom = sitemap_qs2dom(qs, '/books', Books._rec_name)
+        for f in Books.search(dom):
+            loc = '/books/%s' % slug(f)
+            if not qs or qs.lower() in loc:
+                yield {'loc': loc}
 
-    @http.route('/books/<model("library.book"):book>', type='http', auth="user", website=True)
+    @http.route('/books/<model("library.book"):book>', type='http', auth="user", website=True, sitemap=True)
     def library_book_detail(self, book):
         return request.render(
             'library.book_detail', {
                                     'book': book,
+                                    'main_object': book
                                     })
     
     @http.route('/library/books', type='json',auth='none')
@@ -83,6 +95,26 @@ class Main(http.Controller):
                             </body>
                         </html>""" % image_url
         return html_result
+
+    
+    @http.route('/books/submit_issues', type='http', auth="user", website=True)
+    def books_issues(self, **post):
+        if post.get('book_id'):
+            book_id = int(post.get('book_id'))
+            issue_description = post.get('issue_description')
+            request.env['book.issue'].sudo().create({
+                                        'book_id': book_id,
+                                        'issue_description': issue_description,
+                                        'submitted_by': request.env.user.id
+                                        })
+            return request.redirect('/books/submit_issues?submitted=1')
+        return request.render('library.books_issue_form',
+                    {
+                    'books': request.env['library.book'].search([]),
+                    'submitted': post.get('submitted', False)
+                    })
+
+    
 
    
    
