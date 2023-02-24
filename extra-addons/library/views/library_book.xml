@@ -16,38 +16,35 @@
         <field name="name">Library Book Form</field>
         <field name="model">library.book</field>
         <field name="arch" type="xml">            
-            <form>
-                <field name="active" invisible="1"/>
+            <form>        
+                
+                
                 <header>
-                    <button name="%(action_wizard_rent_books)d " string="Rent this book" type="action" class="btn-primary" context="{'default_lead_id': active_id}" />
-                    <button name="return_all_books" string="Return all book" type="object" class="btn-primary" groups="my_library.group_self_borrow"/>
+                    <button name="%(library.action_wizard_rent_books)d" string="Rent this book" type="action" class="btn-primary"/>
                     <button name="make_available" string="Disponibilizar" type="object"/>
                     <button name="make_borrowed" string="Emprestado" type="object"/>
                     <button name="make_lost" string="Perdido" type="object"/> 
                     <button name="make_draft" string="Indisponível" type="object"/> 
                     <field name="state" widget="statusbar"/> 
-                </header>   
+                </header> 
                 <sheet>
+                    <field name="active" invisible="1"/> 
+                    
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button"
-                                name="%(library_book_rent_action)d"
-                                type="action" icon="fa-book"
-                                context="{'search_default_book_id': active_id}">
-                        <field string="Rent Orders"
-                                name="rent_count"
-                                widget="statinfo"/>
+                        <button name="%(library.library_book_rent_action)d" type="action" icon="fa-book" class="oe_stat_button">
+                            <field name="rent_count" string="Rent Orders" widget="statinfo"/>
                         </button>
                     </div>
 
                     <widget name="web_ribbon" title="Perdido" bg_color="bg-danger" attrs="{'invisible': [('state', '!=', 'lost')]}"/>
                     <widget name="web_ribbon" title="Disponível" attrs="{'invisible': [('state', '!=', 'available')]}" />
                     <widget name="web_ribbon" title="Emprestado" bg_color="bg-warning" attrs="{'invisible': [('state', '!=', 'borrowed')]}" />
-    
+                    
                     <group>
                         <group>
                             <field name="name"/>
                             <field name="author_ids" widget="many2many_tags"/>
-                            <!--field name="state"/-->
+                            <field name="website_id"/>
                             <field name="notes"/>
                             <field name="category_id"/>
                             <field name="isbn"/> 
@@ -81,8 +78,9 @@
                                 <field name="issue_description"/>
                             </tree>
                         </field>
-                    </group>                
-                </sheet>                            
+                    </group>   
+                                 
+                </sheet>                                             
             </form>
         </field> 
                

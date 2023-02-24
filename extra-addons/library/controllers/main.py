@@ -24,7 +24,9 @@ class Main(http.Controller):
                 yield {'loc': loc}
 
     @http.route('/books/<model("library.book"):book>', type='http', auth="user", website=True, sitemap=True)
-    def library_book_detail(self, book):
+    def library_book_detail(self, book, **post):
+        if not book.can_access_from_current_website():
+            raise werkzeug.exceptions.NotFound()
         return request.render(
             'library.book_detail', {
                                     'book': book,

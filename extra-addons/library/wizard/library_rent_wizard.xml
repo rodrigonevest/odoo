@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <act_window id="action_wizard_rent_books" name="Give on Rent" res_model="library.rent.wizard" view_mode="form" target="new" />
-    <!--menuitem id="menu_wizard_rent_books" parent="library_base_menu" action="action_wizard_rent_books" sequence="20" /-->
-            
+    
     <record id='library_rent_wizard_form' model='ir.ui.view'>
         <field name='name'>library rent wizard form view</field>
         <field name='model'>library.rent.wizard</field>
@@ -23,5 +21,15 @@
             </form>
         </field>
     </record>
+
+    <!--menuitem id="menu_wizard_rent_books" parent="library_base_menu" action="action_wizard_rent_books" sequence="20" /-->
+    <record id='action_wizard_rent_books' model='ir.actions.act_window'>
+        <field name="name">Give on Rent</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">library.rent.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="library_rent_wizard_form"/>
+        <field name="target">new</field>
+    </record>  
 
 </odoo>

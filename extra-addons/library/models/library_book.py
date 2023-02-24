@@ -9,17 +9,12 @@ import email
 import datetime
 
 
-class LibraryBookIssues(models.Model):
-    _name = 'book.issue'
-    book_id = fields.Many2one('library.book', required=True)
-    submitted_by = fields.Many2one('res.users')
-    issue_description = fields.Text()
-
-
 class LibraryBook(models.Model):
 
     _name = 'library.book'
-    _inherit = ['website.seo.metadata']
+    _inherit = ['website.seo.metadata',
+                'website.multi.mixin',
+                'website.published.mixin']
     #_inherit = 'base.archive'
     #manager_remarks = fields.Text('Manager Remarks')
     _description = 'Library Book'
@@ -84,6 +79,7 @@ class LibraryBook(models.Model):
 
     #contar o número de pedidos de aluguel de um livro
     rent_count = fields.Integer(compute="_compute_rent_count")
+    
     def _compute_rent_count(self):
         BookRent = self.env['library.book.rent']
         for book in self:
@@ -356,5 +352,9 @@ class BaseArchive(models.AbstractModel):
         for record in self:
             record.active = not record.active
 
-
+class LibraryBookIssues(models.Model):
+    _name = 'book.issue'
+    book_id = fields.Many2one('library.book', required=True)
+    submitted_by = fields.Many2one('res.users')
+    issue_description = fields.Text()
 
