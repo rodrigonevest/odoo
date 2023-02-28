@@ -79,6 +79,9 @@ class LibraryBook(models.Model):
 
     #contar o número de pedidos de aluguel de um livro
     rent_count = fields.Integer(compute="_compute_rent_count")
+
+    # capitulo 15
+    color = fields.Integer()
     
     def _compute_rent_count(self):
         BookRent = self.env['library.book.rent']

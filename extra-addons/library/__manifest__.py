@@ -37,4 +37,8 @@ Description related to library.
      'demo': [
          'data/demo.xml'
      ],
+
+      "qweb": [ 
+        'static/src/xml/qweb_template.xml',
+    ],
 }

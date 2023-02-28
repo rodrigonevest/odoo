@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Rigistrando os arquivos ativos-->
+<template id="assets_end" inherit_id="web.assets_backend">
+    <xpath expr="." position="inside">
+        <script src="/library/static/src/js/field_widget.js" type="text/javascript" />
+        <link href="/library/static/src/scss/field_widget.scss" rel="stylesheet" type="text/scss" />
+    </xpath>
+</template>
+
+</odoo>
+<!-- 
+
 <template id="books">
     <t t-call="website.layout">
         <div class="oe_structure">
@@ -38,16 +49,16 @@
             This is a non-editable text after the list of books.
         </section>
     </t>
-</template>
+</template>-->
 
-<!-- inheritance example -->
+<!-- inheritance example 
 <template id="books_ids_inh" inherit_id="library.books">
     <xpath expr="//div[@id='card_body']/b" position="replace">
         <b class="mt8"> Authors (<t t-esc="len(book.author_ids)"/>) </b>
     </xpath>
-</template>
+</template>-->
 
-<!-- Book Detail Page -->
+<!-- Book Detail Page 
 <template id="book_detail" name="Books Detail">
     <t t-call="website.layout">
         <div class="container">
@@ -71,8 +82,10 @@
         </div>
         <div t-field="book.html_description"/>
     </t>
-</template>
+</template>-->
 
+
+<!-- 
 <template id="books_issue_form" name="Book Issues Form">
     <t t-call="website.layout">
         <div class="container mt32">
@@ -111,8 +124,7 @@
         </div>
     </t>
 </template>
-
-</odoo>
+-->
 
      <!-- Chamando arquivos css, js e scss 
     <template id="assets_frontend" inherit_id="web.assets_frontend">
